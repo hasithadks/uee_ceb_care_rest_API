@@ -5,6 +5,7 @@ const app = express();
 const  mongoClient = require('mongodb').MongoClient
 
 const user = require('./model/UserAccountModel');
+const aList = require('./model/producList');
 
 app.use(express.json());
 
@@ -16,7 +17,7 @@ app.listen(3000, () => {
     const client = new MongoClient(uri, { useNewUrlParser: true ,  useUnifiedTopology: true });
     client.connect(err => {
         const collection = client.db("cebcare").collection("cebUsers");
-
+        const collection_access_list = client.db("cebcare").collection("productList");
         if(err){
             console.log("Error while Connecting mongo client");
         } else {
@@ -51,27 +52,62 @@ app.listen(3000, () => {
 
             })
 
-
             app.post('/login', (req, res) => {
-            const query = {
-                userName : req.body.userName,
-                password : req.body.password
-            }
-
-            console.log(query);
-
-            collection.findOne(query, (err, result) => {
-
-                console.log(result);
-                if(result != null){
-                    console.log("send 200");
-                    res.status(200).send()
-                } else {
-                    res.status(404).send()
+                const query = {
+                    userName : req.body.userName,
+                    password : req.body.password
                 }
 
+                console.log(query);
+
+                collection.findOne(query, (err, result) => {
+
+                    console.log(result);
+                    if(result != null){
+                        console.log("send 200");
+                        res.status(200).send()
+                    } else {
+                        res.status(404).send()
+                    }
+
+                })
+
             })
-        })
+
+
+            app.post('/getAccessByCensus', (req, res) => {
+
+                collection_access_list.find().toArray(function(err, result) {
+                    if(result != null){
+                        console.log(result);
+
+                        res.status(200).send(JSON.stringify(result))
+
+                    } else {
+                        res.status(400).send()
+                    }
+                })
+
+            })
+
+            app.post('/addAccessByCensus', (req, res) => {
+
+                const newList = new aList({
+                    device: req.body.device,
+                    qty:req.body.qty,
+                    hours:req.body.hours,
+                    power:req.body.power,
+                    kDay:req.body.kDay
+
+                });
+                collection_access_list.insertOne(newList, (err, result) => {
+
+                    res.status(200).send(JSON.stringify(result))
+                })
+
+            })
+
+
         }
 
     });

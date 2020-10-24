@@ -13,6 +13,6 @@ const UserAccountSchema = new Schema({
 
 });
 
-const userAccount = mongoose.model('userAccount', UserAccountSchema);
+const productList = mongoose.model('productList', UserAccountSchema);
 
-module.exports = userAccount;
+module.exports = productList;
